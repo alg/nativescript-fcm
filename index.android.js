@@ -2,7 +2,7 @@ var FCM         = require("./index-common.js");
 var Application = require('application');
 
 var context     = Application.android.context;
-var Plugin      = com.noizeramp.Plugin;
+var Plugin      = com.noizeramp.nsfcm.Plugin;
 
 // ------------------------------------------------------------------------------------------------
 // Public API
