@@ -38,14 +38,14 @@ Installation for Android
   * Near the top add Google Services to the dependencies section like
     this (gradle classpath should already be there):
 
-      dependencies {
-        classpath "com.android.tools.build:gradle:1.5.0"
-        classpath "com.google.gms:google-services:3.0.0"
-      }
+        dependencies {
+          classpath "com.android.tools.build:gradle:1.5.0"
+         classpath "com.google.gms:google-services:3.0.0"
+        }
 
   * At the very bottom add Google Services plugin:
 
-      apply plugin: "com.google.gms.google-services"
+          apply plugin: "com.google.gms.google-services"
 
 * Put your `google-services.json` into `platforms/android/` folder.
 
