@@ -105,3 +105,30 @@ API Example
     } else {
       // ... Unable to get token ...
     }
+
+
+Handling app launches
+---------------------
+
+When the user taps the notification, your app is launched with some
+extra data. Here's how you can easily extract it in your `app.js`:
+
+    var Application = require("application");
+    var FCM         = require("nativescript-fcm");
+
+    // On app launch, but before we do anything else, we check how
+    // exactly this app was started.
+    Application.on(Application.launchEvent, function(args) {
+      var notificationData = FCM.launchNotificationData(args);
+
+      if (notificationData) {
+        console.log("Launched from notification:");
+        console.log(JSON.stringify(notificationData));
+        // {"custom_key":"value","from":"1081060181241","collapse_key":"com.myapp.test"}
+      } else {
+        console.log("Normal launch");
+      }
+    });
+
+    Application.start({ moduleName: "main-page" });
+

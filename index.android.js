@@ -49,6 +49,29 @@ function unsubscribe(topic) {
   Plugin.unsubscribe(context, topic);
 }
 
+/**
+ * Returns whatever launch options we are passed by the OS in case the app was launched
+ * from a notification tap. If it's a normal launch, #false is returned.
+ */
+function launchNotificationData(args) {
+  if (args.android) {
+    var extras = args.android.getExtras();
+    if (extras) {
+      var from = extras.getString("from");
+      if (from) {
+        var keys = extras.keySet().toArray();
+        var data = {};
+        for (var i = 0; i < keys.length; i++) {
+          var key = keys[i];
+          data[key] = extras.getString(key);
+        }
+        return data;
+      }
+    }
+  }
+
+  return false;
+}
 
 // ------------------------------------------------------------------------------------------------
 // Exports
@@ -59,5 +82,6 @@ FCM.setMessageListener      = setMessageListener;
 FCM.getToken                = getToken;
 FCM.subscribe               = subscribe;
 FCM.unsubscribe             = unsubscribe;
+FCM.launchNotificationData  = launchNotificationData;
 
 module.exports = FCM;
