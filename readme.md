@@ -15,12 +15,12 @@ API Example
     var FCM = require('nativescript-fcm');
 
     // Register token refresh listener
-    FCM.addEventListener(FCM.EVENT_TOKEN_REFRESH, function(e) {
+    FCM.setOnTokenRefreshListener(function(e) {
       sendTokenToBackend(e.token);
     });
 
     // Register message listener
-    FCM.addEventListener(FCM.EVENT_MESSAGE_RECEIVED, function(e) {
+    FCM.setOnMessageListener(function(e) {
       // e.messageId
       // e.messageType
       // e.sentTime

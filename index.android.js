@@ -1,51 +1,46 @@
-var FCM = require("./index-common.js");
+var FCM         = require("./index-common.js");
+var Application = require('application');
 
-// ------------------------------------------------------------------------------------------------
-// Events
-// ------------------------------------------------------------------------------------------------
-
-/**
- * Sent on token refresh.
- */
-var EVENT_TOKEN_REFRESH    = "token";
-
-/**
- * Sent on new message.
- */
-var EVENT_MESSAGE_RECEIVED = "message";
+var context     = Application.android.context;
+var Plugin      = com.noizeramp.Plugin;
 
 // ------------------------------------------------------------------------------------------------
 // Public API
 // ------------------------------------------------------------------------------------------------
 
 /**
- * Adds event listener.
+ * Registers onTokenRefresh listener.
  */
-function addEventListener(event, listener) {
+function setOnTokenRefreshListener(listener) {
+  Plugin.setOnTokenRefreshListener(new Listener({ callback: listener }));
 }
 
 /**
- * Removes event listener.
+ * Registers message listener.
  */
-function removeEventListener(event, listener) {
+function setOnMessageListener(listener) {
+  Plugin.setOnMessageListener(new Listener({ callback: listener }));
 }
 
 /**
  * Requests the registration token.
  */
 function getToken() {
+  return Plugin.getToken(context);
 }
 
 /**
  * Subscribes to a certain topic.
  */
 function subscribe(topic) {
+  Plugin.subscribe(context, topic);
 }
 
 /**
  * Unsubscribes from a certain topic.
  */
 function unsubscribe(topic) {
+  Plugin.unsubscribe(context, topic);
 }
 
 
@@ -53,10 +48,10 @@ function unsubscribe(topic) {
 // Exports
 // ------------------------------------------------------------------------------------------------
 
-FCM.addEventListener    = addEventListener;
-FCM.removeEventListener = removeEventListener;
-FCM.getToken            = getToken;
-FCM.subscribe           = subscribe;
-FCM.unsubscribe         = unsubscribe;
+FCM.setOnTokenRefreshListener = setOnTokenRefreshListener;
+FCM.setOnMessageListener      = setOnMessageListener;
+FCM.getToken                  = getToken;
+FCM.subscribe                 = subscribe;
+FCM.unsubscribe               = unsubscribe;
 
 module.exports = FCM;
