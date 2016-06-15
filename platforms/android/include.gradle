@@ -1,0 +1,17 @@
+android {
+    productFlavors {
+        "nrfcm" {
+            dimension "nrfcm"
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile 'com.google.firebase:firebase-messaging:9.0.2'
+    compile "com.google.android.gms:play-services-identity:9.0.2"
+}

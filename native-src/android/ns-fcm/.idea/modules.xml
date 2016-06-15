@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/fcm/fcm.iml" filepath="$PROJECT_DIR$/fcm/fcm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ns-fcm.iml" filepath="$PROJECT_DIR$/ns-fcm.iml" />
+    </modules>
+  </component>
+</project>

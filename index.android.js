@@ -3,6 +3,7 @@ var Application = require('application');
 
 var context     = Application.android.context;
 var Plugin      = com.noizeramp.nsfcm.Plugin;
+var Listener    = com.noizeramp.nsfcm.Listener;
 
 // ------------------------------------------------------------------------------------------------
 // Public API
@@ -11,22 +12,27 @@ var Plugin      = com.noizeramp.nsfcm.Plugin;
 /**
  * Registers onTokenRefresh listener.
  */
-function setOnTokenRefreshListener(listener) {
-  Plugin.setOnTokenRefreshListener(new Listener({ callback: listener }));
+function setTokenRefreshListener(listener) {
+  Plugin.setTokenRefreshListener(new Listener({ callback: listener}));
 }
 
 /**
  * Registers message listener.
  */
-function setOnMessageListener(listener) {
-  Plugin.setOnMessageListener(new Listener({ callback: listener }));
+function setMessageListener(listener) {
+  Plugin.setMessageListener(new Listener({ callback: function(messageJSON, dataJSON) {
+    var message = messageJSON && JSON.parse(messageJSON);
+    var data    = dataJSON && JSON.parse(dataJSON);
+
+    listener(message, data);
+  }}));
 }
 
 /**
  * Requests the registration token.
  */
 function getToken() {
-  return Plugin.getToken(context);
+  return Plugin.getToken();
 }
 
 /**
@@ -48,10 +54,10 @@ function unsubscribe(topic) {
 // Exports
 // ------------------------------------------------------------------------------------------------
 
-FCM.setOnTokenRefreshListener = setOnTokenRefreshListener;
-FCM.setOnMessageListener      = setOnMessageListener;
-FCM.getToken                  = getToken;
-FCM.subscribe                 = subscribe;
-FCM.unsubscribe               = unsubscribe;
+FCM.setTokenRefreshListener = setTokenRefreshListener;
+FCM.setMessageListener      = setMessageListener;
+FCM.getToken                = getToken;
+FCM.subscribe               = subscribe;
+FCM.unsubscribe             = unsubscribe;
 
 module.exports = FCM;
