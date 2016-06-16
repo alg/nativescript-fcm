@@ -132,3 +132,9 @@ extra data. Here's how you can easily extract it in your `app.js`:
 
     Application.start({ moduleName: "main-page" });
 
+
+Building native lib for Android
+-------------------------------
+
+Check out `native-src/android/readme.md`.
+
