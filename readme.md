@@ -40,7 +40,7 @@ Installation for Android
 
         dependencies {
           classpath "com.android.tools.build:gradle:1.5.0"
-         classpath "com.google.gms:google-services:3.0.0"
+          classpath "com.google.gms:google-services:3.0.0"
         }
 
   * At the very bottom add Google Services plugin:
@@ -101,7 +101,7 @@ API Example
       sendTokenToBackend(token);
 
       // (Optionally) subscribe to a topic
-      FCM.subscribe("news");
+      FCM.subscribeToTopic("news");
     } else {
       // ... Unable to get token ...
     }
@@ -124,7 +124,13 @@ extra data. Here's how you can easily extract it in your `app.js`:
       if (notificationData) {
         console.log("Launched from notification:");
         console.log(JSON.stringify(notificationData));
+
+        // Normal notification:
         // {"custom_key":"value","from":"1081060181241","collapse_key":"com.myapp.test"}
+        //
+        // Topic notification:
+        // {"from":"/topics/news","collapse_key":"com.myapp.test"}
+
       } else {
         console.log("Normal launch");
       }

@@ -1,7 +1,5 @@
 var FCM         = require("./index-common.js");
-var Application = require('application');
 
-var context     = Application.android.context;
 var Plugin      = com.noizeramp.nsfcm.Plugin;
 var Listener    = com.noizeramp.nsfcm.Listener;
 
@@ -38,15 +36,15 @@ function getToken() {
 /**
  * Subscribes to a certain topic.
  */
-function subscribe(topic) {
-  Plugin.subscribe(context, topic);
+function subscribeToTopic(topic) {
+  Plugin.subscribeToTopic(topic);
 }
 
 /**
  * Unsubscribes from a certain topic.
  */
-function unsubscribe(topic) {
-  Plugin.unsubscribe(context, topic);
+function unsubscribeFromTopic(topic) {
+  Plugin.unsubscribeFromTopic(topic);
 }
 
 /**
@@ -80,8 +78,8 @@ function launchNotificationData(args) {
 FCM.setTokenRefreshListener = setTokenRefreshListener;
 FCM.setMessageListener      = setMessageListener;
 FCM.getToken                = getToken;
-FCM.subscribe               = subscribe;
-FCM.unsubscribe             = unsubscribe;
+FCM.subscribeToTopic        = subscribeToTopic;
+FCM.unsubscribeFromTopic    = unsubscribeFromTopic;
 FCM.launchNotificationData  = launchNotificationData;
 
 module.exports = FCM;

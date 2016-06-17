@@ -3,6 +3,7 @@ package com.noizeramp.nsfcm;
 import android.content.Context;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONObject;
 
@@ -46,21 +47,19 @@ public class Plugin {
     /**
      * Subscribes to the given topic.
      *
-     * @param context   current context.
      * @param topic     topic name.
      */
-    public static void subscribe(Context context, String topic) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public static void subscribeToTopic(String topic) {
+        FirebaseMessaging.getInstance().subscribeToTopic(topic);
     }
 
     /**
      * Unsubscribes from the given topic.
      *
-     * @param context   current context.
      * @param topic     topic name.
      */
-    public static void unsubscribe(Context context, String topic) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public static void unsubscribeFromTopic(String topic) {
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
     }
 
     static void executeOnMessageReceivedCallback(JSONObject message, JSONObject data) {
