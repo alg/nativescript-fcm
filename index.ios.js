@@ -1,10 +1,9 @@
 var FCM         = require("./index-common.js");
+var Application = require("application");
 
-var Plugin      = com.noizeramp.nsfcm.Plugin;
-var Listener    = com.noizeramp.nsfcm.Listener;
-
-var tokenPromises = [];
+var messageListener = null;
 var tokenRefreshListener = null;
+var tokenPromises = [];
 
 // ------------------------------------------------------------------------------------------------
 // Public API
@@ -14,14 +13,31 @@ var tokenRefreshListener = null;
  * Initializes the handlers, but doesn't ask for permissions or requesting tokens yet.
  */
 function init() {
-  Plugin.setTokenRefreshListener(new Listener({ callback: _onTokenRefresh }));
+  if (Application.ios.delegate === undefined) {
+    Application.ios.delegate = UIResponder.extend({}, { name: "AppDelegate", protocols: [UIApplicationDelegate] });
+  }
+
+  // Subscribe to token refreshes
+  NSNotificationCenter.defaultCenter().addObserverForNameObjectQueueUsingBlock(
+    "kFIRInstanceIDTokenRefreshNotification",
+    null,
+    NSOperationQueue.mainQueue(),
+    _onTokenRefresh);
+
+  _addMethodsToDelegate();
+
+  // Configure the application
+  FIRApp.configure();
 }
 
 /**
  * Registers for notifications.
  */
 function registerForNotifications() {
-  // Do nothing
+  var notificationTypes = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationActivationModeBackground;
+  var notificationSettings = UIUserNotificationSettings.settingsForTypesCategories(notificationTypes, null);
+  Application.registerUserNotificationSettings(notificationSettings);
+  Application.registerForRemoteNotifications();
 }
 
 /**
@@ -29,11 +45,12 @@ function registerForNotifications() {
  */
 function requestToken() {
   return new Promise(function(resolve, _reject) {
-    var token = Plugin.getToken();
+    var token = FIRInstanceID.instanceID().token();
     if (token) {
       resolve(token);
 
       _resolveTokenPromises(token);
+      _connectToFCM();
     } else {
       tokenPromises.push(resolve);
     }
@@ -51,26 +68,21 @@ function setTokenRefreshListener(listener) {
  * Registers message listener.
  */
 function setMessageListener(listener) {
-  Plugin.setMessageListener(new Listener({ callback: function(messageJSON, dataJSON) {
-    var message = messageJSON && JSON.parse(messageJSON);
-    var data    = dataJSON && JSON.parse(dataJSON);
-
-    listener(message, data);
-  }}));
+  messageListener = listener;
 }
 
 /**
  * Subscribes to a certain topic.
  */
 function subscribeToTopic(topic) {
-  Plugin.subscribeToTopic(topic);
+  FIRMessaging.messaging().subscribeToTopic(topic);
 }
 
 /**
  * Unsubscribes from a certain topic.
  */
 function unsubscribeFromTopic(topic) {
-  Plugin.unsubscribeFromTopic(topic);
+  FIRMessaging.messaging().unsubscribeFromTopic(topic);
 }
 
 /**
@@ -78,28 +90,42 @@ function unsubscribeFromTopic(topic) {
  * from a notification tap. If it's a normal launch, #false is returned.
  */
 function launchNotificationData(args) {
-  if (args.android) {
-    var extras = args.android.getExtras();
-    if (extras) {
-      var from = extras.getString("from");
-      if (from) {
-        var keys = extras.keySet().toArray();
-        var data = {};
-        for (var i = 0; i < keys.length; i++) {
-          var key = keys[i];
-          data[key] = extras.getString(key);
-        }
-        return data;
-      }
-    }
-  }
-
+  // TODO implement
   return false;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
+
+function _addMethodsToDelegate() {
+  var delegate = Application.ios.delegate;
+
+  delegate.applicationDidReceiveRemoteNotificationFetchCompletionHandler = function(_application, userInfo, _completionHandler) {
+    console.log("Notification received");
+    console.log(JSON.stringify(userInfo));
+    messageListener(userInfo, {});
+  };
+
+  delegate.applicationDidBecomeActive = function(_application) {
+    _connectToFCM();
+  };
+
+  delegate.applicationDidEnterBackground = function(_application) {
+    _disconnectFromFCM();
+  };
+}
+
+function _onTokenRefresh() {
+  var token = FIRInstanceID.instanceID().token();
+  if (token === null) return;
+
+  console.log("[FCM] Token received: " + token);
+  if (tokenRefreshListener) tokenRefreshListener({ token: token });
+
+  _resolveTokenPromises(token);
+  _connectToFCM();
+}
 
 function _resolveTokenPromises(token) {
   var promises = tokenPromises;
@@ -108,14 +134,16 @@ function _resolveTokenPromises(token) {
   for (var p of promises) p(token);
 }
 
-function _onTokenRefresh() {
-  var token = Plugin.getToken();
-  if (token === null) return;
+// ------------------------------------------------------------------------------------------------
+// FCM
+// ------------------------------------------------------------------------------------------------
 
-  console.log("[FCM] Token received: " + token);
-  if (tokenRefreshListener) tokenRefreshListener({ token: token });
+function _connectToFCM() {
+  console.log("Connect to FCM");
+}
 
-  _resolveTokenPromises(token);
+function _disconnectFromFCM() {
+  console.log("Disconnect from FCM");
 }
 
 // ------------------------------------------------------------------------------------------------

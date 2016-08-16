@@ -1,0 +1,28 @@
+{
+    "env": { "node": true, "es6": true },
+    "extends": "eslint:recommended",
+    "rules": {
+        "indent": [ 2, 2, { "SwitchCase": 1 } ],
+        "linebreak-style": [ 2, "unix" ],
+        "semi": [ 2, "always" ],
+        "no-unused-vars": [2, { "argsIgnorePattern": "^_|args" }],
+        "no-console": 0
+    },
+    "globals": {
+      "alert": false,
+      "android": false,
+      "com": false,
+      "FIRApp": false,
+      "FIRInstanceID": false,
+      "FIRMessaging": false,
+      "UIResponder": false,
+      "UIApplicationDelegate": false,
+      "NSNotificationCenter": false,
+      "NSOperationQueue": false,
+      "UIUserNotificationTypeAlert": false,
+      "UIUserNotificationTypeBadge": false,
+      "UIUserNotificationTypeSound": false,
+      "UIUserNotificationActivationModeBackground": false,
+      "UIUserNotificationSettings": false
+    }
+}
