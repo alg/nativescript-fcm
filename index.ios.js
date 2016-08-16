@@ -163,8 +163,9 @@ function _hasPermission() {
 function _registerForNotifications() {
   var notificationTypes = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationActivationModeBackground;
   var notificationSettings = UIUserNotificationSettings.settingsForTypesCategories(notificationTypes, null);
-  Application.registerUserNotificationSettings(notificationSettings);
-  Application.registerForRemoteNotifications();
+  var app = UIApplication.sharedApplication();
+  app.registerUserNotificationSettings(notificationSettings);
+  app.registerForRemoteNotifications();
 }
 
 function _onPermissionRequestResult(result) {
