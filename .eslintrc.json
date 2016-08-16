@@ -19,6 +19,7 @@
       "UIApplicationDelegate": false,
       "NSNotificationCenter": false,
       "NSOperationQueue": false,
+      "UIApplication": false,
       "UIUserNotificationTypeAlert": false,
       "UIUserNotificationTypeBadge": false,
       "UIUserNotificationTypeSound": false,

@@ -5,6 +5,9 @@ var messageListener = null;
 var tokenRefreshListener = null;
 var tokenPromises = [];
 
+var permissionPromises = [];
+var permissionGranted = null;
+
 // ------------------------------------------------------------------------------------------------
 // Public API
 // ------------------------------------------------------------------------------------------------
@@ -17,12 +20,18 @@ function init() {
     Application.ios.delegate = UIResponder.extend({}, { name: "AppDelegate", protocols: [UIApplicationDelegate] });
   }
 
+  var nc = NSNotificationCenter.defaultCenter();
+
   // Subscribe to token refreshes
-  NSNotificationCenter.defaultCenter().addObserverForNameObjectQueueUsingBlock(
+  nc.addObserverForNameObjectQueueUsingBlock(
     "kFIRInstanceIDTokenRefreshNotification",
     null,
     NSOperationQueue.mainQueue(),
     _onTokenRefresh);
+
+  nc.addObserverForNameObjectQueueUsingBlock(
+    "didRegisterUserNotificationSettings",
+    _onPermissionRequestResult);
 
   _addMethodsToDelegate();
 
@@ -34,10 +43,19 @@ function init() {
  * Registers for notifications.
  */
 function registerForNotifications() {
-  var notificationTypes = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationActivationModeBackground;
-  var notificationSettings = UIUserNotificationSettings.settingsForTypesCategories(notificationTypes, null);
-  Application.registerUserNotificationSettings(notificationSettings);
-  Application.registerForRemoteNotifications();
+  return new Promise(function(resolve, reject) {
+    try {
+      // If we already asked, quick exit
+      if (permissionGranted !== null) return resolve(permissionGranted);
+      if (_hasPermission) return resolve(true);
+
+      permissionPromises.push(resolve);
+      _registerForNotifications();
+    } catch (ex) {
+      console.log("Error in FCM.requestPermission: " + ex);
+      reject(ex);
+    }
+  });
 }
 
 /**
@@ -129,9 +147,29 @@ function _onTokenRefresh() {
 
 function _resolveTokenPromises(token) {
   var promises = tokenPromises;
-  tokenPromises = null;
-
+  tokenPromises = [];
   for (var p of promises) p(token);
+}
+
+function _hasPermission() {
+  var settings = UIApplication.sharedApplication().currentUserNotificationSettings();
+  var types = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
+  return settings.types & types;
+}
+
+function _registerForNotifications() {
+  var notificationTypes = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationActivationModeBackground;
+  var notificationSettings = UIUserNotificationSettings.settingsForTypesCategories(notificationTypes, null);
+  Application.registerUserNotificationSettings(notificationSettings);
+  Application.registerForRemoteNotifications();
+}
+
+function _onPermissionRequestResult(result) {
+  permissionGranted = result.userInfo.objectForKey('message') != "false";
+
+  var promises = permissionPromises;
+  permissionPromises = [];
+  for (var p of promises) p(permissionGranted);
 }
 
 // ------------------------------------------------------------------------------------------------
