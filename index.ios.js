@@ -128,13 +128,8 @@ function _addMethodsToDelegate() {
     messageListener(userInfo, {});
   };
 
-  delegate.applicationDidBecomeActive = function(_application) {
-    _connectToFCM();
-  };
-
-  delegate.applicationDidEnterBackground = function(_application) {
-    _disconnectFromFCM();
-  };
+  Application.on(Application.resumeEvent, _connectToFCM);
+  Application.on(Application.suspendEvent, _disconnectFromFCM);
 }
 
 function _onTokenRefresh() {
@@ -182,10 +177,18 @@ function _onPermissionRequestResult(result) {
 
 function _connectToFCM() {
   console.log("Connect to FCM");
+  FIRMessaging.messaging().connectWithCompletion(function(error) {
+    if (error) {
+      console.log("Firebase was unable to connect to FCM. Error: " + error);
+    } else {
+      console.log("Connected to FCM");
+    }
+  });
 }
 
 function _disconnectFromFCM() {
   console.log("Disconnect from FCM");
+  FIRMessaging.messaging().disconnect();
 }
 
 // ------------------------------------------------------------------------------------------------
