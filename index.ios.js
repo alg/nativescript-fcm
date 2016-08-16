@@ -50,7 +50,7 @@ function registerForNotifications() {
     try {
       // If we already asked, quick exit
       if (permissionGranted !== null) return resolve(permissionGranted);
-      if (_hasPermission) return resolve(true);
+      if (_hasPermission()) return resolve(true);
 
       permissionPromises.push(resolve);
       _registerForNotifications();
