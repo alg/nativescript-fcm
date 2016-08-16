@@ -1,7 +1,7 @@
 var FCM         = require("./index-common.js");
 var Application = require("application");
+var types       = require("utils/types");
 
-var messageListener = null;
 var tokenRefreshListener = null;
 var tokenPromises = [];
 
@@ -16,10 +16,6 @@ var permissionGranted = null;
  * Initializes the handlers, but doesn't ask for permissions or requesting tokens yet.
  */
 function init() {
-  if (Application.ios.delegate === undefined) {
-    Application.ios.delegate = UIResponder.extend({}, { name: "AppDelegate", protocols: [UIApplicationDelegate] });
-  }
-
   var nc = NSNotificationCenter.defaultCenter();
 
   // Subscribe to token refreshes
@@ -35,7 +31,9 @@ function init() {
     NSOperationQueue.mainQueue(),
     _onPermissionRequestResult);
 
-  _addMethodsToDelegate();
+  // Signup to events
+  Application.on(Application.resumeEvent, _connectToFCM);
+  Application.on(Application.suspendEvent, _disconnectFromFCM);
 
   // Configure the application
   FIRApp.configure();
@@ -55,7 +53,7 @@ function registerForNotifications() {
       permissionPromises.push(resolve);
       _registerForNotifications();
     } catch (ex) {
-      console.log("Error in FCM.requestPermission: " + ex);
+      console.log("[FCM] Notification registration failed: " + ex);
       reject(ex);
     }
   });
@@ -88,8 +86,11 @@ function setTokenRefreshListener(listener) {
 /**
  * Registers message listener.
  */
-function setMessageListener(listener) {
-  messageListener = listener;
+function setMessageListener(_listener) {
+  // TODO unimplemented
+  // The issue is that if the UIApplicationDelegate is already defined,
+  // I can't find a way to add a method to it (applicationDidReceiveRemoteNotification),
+  // so the users has to register themselves for now.
 }
 
 /**
@@ -118,19 +119,6 @@ function launchNotificationData(args) {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-
-function _addMethodsToDelegate() {
-  var delegate = Application.ios.delegate;
-
-  delegate.applicationDidReceiveRemoteNotificationFetchCompletionHandler = function(_application, userInfo, _completionHandler) {
-    console.log("Notification received");
-    console.log(JSON.stringify(userInfo));
-    messageListener(userInfo, {});
-  };
-
-  Application.on(Application.resumeEvent, _connectToFCM);
-  Application.on(Application.suspendEvent, _disconnectFromFCM);
-}
 
 function _onTokenRefresh() {
   var token = FIRInstanceID.instanceID().token();
@@ -171,23 +159,63 @@ function _onPermissionRequestResult(result) {
   for (var p of promises) p(permissionGranted);
 }
 
+function objcToJS(objCObj) {
+  if (objCObj === null || typeof objCObj != "object") {
+    return objCObj;
+  }
+  var node, key, i, l, oKeyArr = objCObj.allKeys;
+
+  if (oKeyArr === undefined) {
+    // array
+    node = [];
+    for (i = 0, l = objCObj.count; i < l; i++) {
+      key = objCObj.objectAtIndex(i);
+      node.push(objcToJS(key));
+    }
+  } else {
+    // object
+    node = {};
+    for (i = 0, l = oKeyArr.count; i < l; i++) {
+      key = oKeyArr.objectAtIndex(i);
+      var val = objCObj.valueForKey(key);
+
+      switch (types.getClass(val)) {
+        case 'NSMutableArray':
+          node[key] = objcToJS(val);
+          break;
+        case 'NSMutableDictionary':
+          node[key] = objcToJS(val);
+          break;
+        case 'String':
+          node[key] = String(val);
+          break;
+        case 'Boolean':
+          node[key] = val;
+          break;
+        case 'Number':
+          node[key] = Number(String(val));
+          break;
+      }
+    }
+  }
+  return node;
+}
+
 // ------------------------------------------------------------------------------------------------
 // FCM
 // ------------------------------------------------------------------------------------------------
 
 function _connectToFCM() {
-  console.log("Connect to FCM");
   FIRMessaging.messaging().connectWithCompletion(function(error) {
     if (error) {
-      console.log("Firebase was unable to connect to FCM. Error: " + error);
+      console.log("[FCM] Connection failed: " + error);
     } else {
-      console.log("Connected to FCM");
+      console.log("[FCM] Connected");
     }
   });
 }
 
 function _disconnectFromFCM() {
-  console.log("Disconnect from FCM");
   FIRMessaging.messaging().disconnect();
 }
 
@@ -203,5 +231,8 @@ FCM.requestToken             = requestToken;
 FCM.subscribeToTopic         = subscribeToTopic;
 FCM.unsubscribeFromTopic     = unsubscribeFromTopic;
 FCM.launchNotificationData   = launchNotificationData;
+
+// iOS specific
+FCM.objcToJS                 = objcToJS;
 
 module.exports = FCM;
