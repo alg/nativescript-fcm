@@ -41,6 +41,7 @@ function init() {
 
 /**
  * Registers for notifications.
+ * Returns Promise<boolean>
  */
 function registerForNotifications() {
   return new Promise(function(resolve, reject) {

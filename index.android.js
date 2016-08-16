@@ -19,9 +19,10 @@ function init() {
 
 /**
  * Registers for notifications.
+ * Returns Promise<boolean>
  */
 function registerForNotifications() {
-  // Do nothing
+  return new Promise(function(resolve, _reject) { resolve(true); });
 }
 
 /**
