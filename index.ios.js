@@ -31,6 +31,8 @@ function init() {
 
   nc.addObserverForNameObjectQueueUsingBlock(
     "didRegisterUserNotificationSettings",
+    null,
+    NSOperationQueue.mainQueue(),
     _onPermissionRequestResult);
 
   _addMethodsToDelegate();
