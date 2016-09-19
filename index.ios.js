@@ -16,19 +16,19 @@ var permissionGranted = null;
  * Initializes the handlers, but doesn't ask for permissions or requesting tokens yet.
  */
 function init() {
-  var nc = NSNotificationCenter.defaultCenter();
+  var nc = NSNotificationCenter.defaultCenter;
 
   // Subscribe to token refreshes
   nc.addObserverForNameObjectQueueUsingBlock(
     "kFIRInstanceIDTokenRefreshNotification",
     null,
-    NSOperationQueue.mainQueue(),
+    NSOperationQueue.mainQueue,
     _onTokenRefresh);
 
   nc.addObserverForNameObjectQueueUsingBlock(
     "didRegisterUserNotificationSettings",
     null,
-    NSOperationQueue.mainQueue(),
+    NSOperationQueue.mainQueue,
     _onPermissionRequestResult);
 
   // Signup to events
