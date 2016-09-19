@@ -1,6 +1,7 @@
 var FCM         = require("./index-common.js");
 var Application = require("application");
 var types       = require("utils/types");
+var utils       = require("utils/utils");
 
 var tokenRefreshListener = null;
 var tokenPromises = [];
@@ -16,20 +17,12 @@ var permissionGranted = null;
  * Initializes the handlers, but doesn't ask for permissions or requesting tokens yet.
  */
 function init() {
-  var nc = NSNotificationCenter.defaultCenter;
+  var nc    = utils.ios.getter(NSNotificationCenter, NSNotificationCenter.defaultCenter);
+  var queue = utils.ios.getter(NSOperationQueue, NSOperationQueue.mainQueue);
 
   // Subscribe to token refreshes
-  nc.addObserverForNameObjectQueueUsingBlock(
-    "kFIRInstanceIDTokenRefreshNotification",
-    null,
-    NSOperationQueue.mainQueue,
-    _onTokenRefresh);
-
-  nc.addObserverForNameObjectQueueUsingBlock(
-    "didRegisterUserNotificationSettings",
-    null,
-    NSOperationQueue.mainQueue,
-    _onPermissionRequestResult);
+  nc.addObserverForNameObjectQueueUsingBlock("kFIRInstanceIDTokenRefreshNotification", null, queue, _onTokenRefresh);
+  nc.addObserverForNameObjectQueueUsingBlock("didRegisterUserNotificationSettings", null, queue, _onPermissionRequestResult);
 
   // Signup to events
   Application.on(Application.resumeEvent, _connectToFCM);
