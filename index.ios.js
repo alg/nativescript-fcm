@@ -1,7 +1,7 @@
 var FCM         = require("./index-common.js");
 var Application = require("application");
 var types       = require("utils/types");
-var utils       = require("utils/utils");
+var Utils       = require("utils/utils");
 
 var tokenRefreshListener = null;
 var tokenPromises = [];
@@ -17,8 +17,8 @@ var permissionGranted = null;
  * Initializes the handlers, but doesn't ask for permissions or requesting tokens yet.
  */
 function init() {
-  var nc    = utils.ios.getter(NSNotificationCenter, NSNotificationCenter.defaultCenter);
-  var queue = utils.ios.getter(NSOperationQueue, NSOperationQueue.mainQueue);
+  var nc    = Utils.ios.getter(NSNotificationCenter, NSNotificationCenter.defaultCenter);
+  var queue = Utils.ios.getter(NSOperationQueue, NSOperationQueue.mainQueue);
 
   // Subscribe to token refreshes
   nc.addObserverForNameObjectQueueUsingBlock("kFIRInstanceIDTokenRefreshNotification", null, queue, _onTokenRefresh);
@@ -131,7 +131,8 @@ function _resolveTokenPromises(token) {
 }
 
 function _hasPermission() {
-  var settings = UIApplication.sharedApplication().currentUserNotificationSettings();
+  var app = Utils.ios.getter(UIApplication, UIApplication.sharedApplication);
+  var settings = Utils.ios.getter(app, app.currentUserNotificationSettings);
   var types = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
   return settings.types & types;
 }
@@ -139,7 +140,7 @@ function _hasPermission() {
 function _registerForNotifications() {
   var notificationTypes = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationActivationModeBackground;
   var notificationSettings = UIUserNotificationSettings.settingsForTypesCategories(notificationTypes, null);
-  var app = UIApplication.sharedApplication();
+  var app = Utils.ios.getter(UIApplication, UIApplication.sharedApplication);
   app.registerUserNotificationSettings(notificationSettings);
   app.registerForRemoteNotifications();
 }
